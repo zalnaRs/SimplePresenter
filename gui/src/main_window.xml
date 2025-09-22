@@ -2,16 +2,10 @@
 <interface>
     <requires lib="gtk" version="4.0"/>
 
-    <!-- Sources model -->
-    <object class="GtkListStore" id="sources_model">
-        <columns>
-            <column type="gchararray"/>
-        </columns>
-    </object>
-
     <!-- Playlist model -->
     <object class="GtkListStore" id="playlist_model">
         <columns>
+            <column type="gchararray"/>
             <column type="gchararray"/>
         </columns>
     </object>
@@ -67,6 +61,22 @@
                                                                 </child>
                                                             </object>
                                                         </child>
+
+                                                        <!-- Skip column -->
+                                                        <child>
+                                                            <object class="GtkTreeViewColumn">
+                                                                <property name="title">Skip</property>
+                                                                <child>
+                                                                    <object class="GtkCellRendererCombo" id="skip_renderer">
+                                                                        <property name="editable">true</property>
+                                                                        <property name="has-entry">true</property>
+                                                                    </object>
+                                                                    <attributes>
+                                                                        <attribute name="text">1</attribute>
+                                                                    </attributes>
+                                                                </child>
+                                                            </object>
+                                                        </child>
                                                     </object>
                                                 </child>
                                             </object>
@@ -88,6 +98,11 @@
                                                 <child>
                                                     <object class="GtkButton" id="move_down_button">
                                                         <property name="label">Move Down</property>
+                                                    </object>
+                                                </child>
+                                                <child>
+                                                    <object class="GtkButton" id="remove_button">
+                                                        <property name="label">Remove</property>
                                                     </object>
                                                 </child>
                                             </object>
