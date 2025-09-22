@@ -1,9 +1,10 @@
-use gtk4::prelude::{CellRendererTextExt, ObjectExt, SocketExtManual, StaticType, TreeModelExt};
+use gtk4::prelude::{CellRendererTextExt, ObjectExt, SocketExtManual, StaticType, TreeModelExt, TreeModelExtManual};
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual, ButtonExt, DialogExt, FileChooserExt, FileExt, GtkWindowExt, RecentManagerExt, TreeViewExt, WidgetExt};
 use gtk4::{Application, ApplicationWindow, Builder, Button, CellRendererCombo, FileChooserAction, FileChooserDialog, ListStore, ResponseType, TreePath, TreeView};
 use shared::{ProjectorCommand, Skip};
 use tokio_tungstenite::connect_async;
 use futures_util::{SinkExt, StreamExt};
+use gtk4::glib::property::PropertyGet;
 use tokio::sync::mpsc::unbounded_channel;
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::Utf8Bytes;
@@ -20,7 +21,6 @@ async fn main() {
 
         let (mut write, mut read) = ws_stream.split();
 
-        // Spawn a reader to handle incoming messages
         tokio::spawn(async move {
             while let Some(msg) = read.next().await {
                 match msg {
@@ -30,14 +30,16 @@ async fn main() {
             }
         });
 
-        // Process outgoing commands
         while let Some(cmd) = cmd_rx.recv().await {
             let payload = match cmd {
-                ProjectorCommand::Start(path) => format!("START {}", path),
+                ProjectorCommand::Start { path, skip } => format!("START {} {}", path, skip),
                 ProjectorCommand::Next => "NEXT".to_string(),
                 ProjectorCommand::Prev => "PREV".to_string(),
             };
-            if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(Utf8Bytes::from(payload))).await {
+            if let Err(e) = write
+                .send(tokio_tungstenite::tungstenite::Message::Text(Utf8Bytes::from(payload)))
+                .await
+            {
                 eprintln!("Send failed: {}", e);
                 break;
             }
@@ -157,10 +159,11 @@ async fn main() {
         skip_renderer.set_property("text-column", &0);
         skip_renderer.set_property("has-entry", &true);
 
+        let playlist_model_clone = playlist_model.clone();
         skip_renderer.connect_edited(move |_, path, new_text| {
             if let Some(tree_path) = TreePath::from_string(path.to_str().unwrap().as_str()) {
-                if let Some(iter) = playlist_model.iter(&tree_path) {
-                    playlist_model.set(&iter, &[(1, &new_text)]);
+                if let Some(iter) = playlist_model_clone.iter(&tree_path) {
+                    playlist_model_clone.set(&iter, &[(1, &new_text)]);
                 }
             }
         });
@@ -169,23 +172,55 @@ async fn main() {
         if let Some(play_button) = builder.object::<Button>("play_button") {
             let cmd_tx_clone = cmd_tx_clone.clone();
 
+            let playlist_model_clone = playlist_model.clone();
+            let playlist_list_clone = playlist_list.clone();
+
             play_button.connect_clicked(move |_| {
-                let _ = cmd_tx_clone.send(ProjectorCommand::Start("/videos/intro.mp4".to_string()));
+                if let Some(iter) = playlist_model_clone.iter_first() {
+                    let path = playlist_model_clone.get_value(&iter, 0).get().unwrap();
+                    let skip = playlist_model_clone.get_value(&iter, 1).get().unwrap();
+
+                    let _ = cmd_tx_clone.send(ProjectorCommand::Start { path, skip });
+
+                    playlist_list_clone.selection().select_iter(&iter);
+                }
             });
         };
 
         if let Some(next_button) = builder.object::<Button>("next_button") {
             let cmd_tx_clone = cmd_tx_clone.clone();
 
+            let playlist_model_clone = playlist_model.clone();
+            let playlist_list_clone = playlist_list.clone();
+
             next_button.connect_clicked(move |_| {
-                let _ = cmd_tx_clone.send(ProjectorCommand::Next);
+                if let Some((_, iter)) = playlist_list_clone.selection().selected() {
+                    let mut next_iter = iter.clone();
+                    if playlist_model_clone.iter_next(&mut next_iter) {
+                        let path = playlist_model_clone.get_value(&next_iter, 0).get().unwrap();
+                        let skip = playlist_model_clone.get_value(&iter, 1).get().unwrap();
+                        let _ = cmd_tx_clone.send(ProjectorCommand::Start { path, skip });
+                        playlist_list_clone.selection().select_iter(&next_iter);
+                    }
+                }
             });
         };
         if let Some(prev_button) = builder.object::<Button>("prev_button") {
             let cmd_tx_clone = cmd_tx_clone.clone();
 
+            let playlist_model_clone = playlist_model.clone();
+            let playlist_list_clone = playlist_list.clone();
+
             prev_button.connect_clicked(move |_| {
-                let _ = cmd_tx_clone.send(ProjectorCommand::Prev);
+                if let Some((_, iter)) = playlist_list_clone.selection().selected() {
+                    let mut prev_iter = iter.clone();
+                    if playlist_model_clone.iter_previous(&mut prev_iter) {
+                        let path = playlist_model_clone.get_value(&prev_iter, 0).get().unwrap();
+                        let skip = playlist_model_clone.get_value(&iter, 1).get().unwrap();
+                        let _ = cmd_tx_clone.send(ProjectorCommand::Start { path, skip });
+                        playlist_list_clone.selection().select_iter(&prev_iter);
+                    }
+                }
             });
         };
 
