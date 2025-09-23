@@ -17,7 +17,7 @@ There is boilerplate setup for future features, like Wayland DRM Leasing etc...
 
 ### Installing
 
-Download it from the [releases](releases).
+Download it from the [releases](releases). Make sure you download [gstreamer](https://gstreamer.freedesktop.org/download/#windows) on Windows.
 
 ### Usage
 
