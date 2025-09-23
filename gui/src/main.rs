@@ -1,17 +1,19 @@
-use std::cell::RefCell;
-use std::rc::Rc;
 use gtk4::prelude::{
-    ApplicationExt, ApplicationExtManual, ButtonExt, FileChooserExt, FileExt,
-    GtkWindowExt, TreeViewExt,
+    ApplicationExt, ApplicationExtManual, ButtonExt, FileChooserExt, FileExt, GtkWindowExt,
+    TreeViewExt,
 };
 use gtk4::prelude::{
-    CellRendererTextExt, EditableExt, NativeDialogExt, ObjectExt, StaticType,
-    TreeModelExt, TreeModelExtManual,
+    CellRendererTextExt, EditableExt, NativeDialogExt, ObjectExt, StaticType, TreeModelExt,
+    TreeModelExtManual,
 };
-use gtk4::{Application, ApplicationWindow, Builder, Button, CellRendererCombo, Editable, Entry, FileChooserAction, FileChooserNative, ListStore, ResponseType, Stack, StackPage, TreePath, TreeView};
-use gtk4::ffi::GtkEntry;
+use gtk4::{
+    Application, ApplicationWindow, Builder, Button, CellRendererCombo, Editable,
+    FileChooserAction, FileChooserNative, ListStore, ResponseType, Stack, TreePath, TreeView,
+};
 use shared::client::ProjectorClient;
 use shared::{ProjectorCommand, Skip};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[tokio::main]
 async fn main() {
@@ -33,24 +35,41 @@ async fn main() {
 
         if let Some(connect_button) = builder.object::<Button>("connect_button") {
             let url_field = builder.object::<Editable>("url_entry").unwrap();
-            let main_stack = main_stack.clone();;
+            let main_stack = main_stack.clone();
 
             let mut projector_client = projector_client.clone();
             connect_button.connect_clicked(move |_| {
-                *projector_client.borrow_mut() = Some(ProjectorClient::new(url_field.text().as_str()));
+                *projector_client.borrow_mut() =
+                    Some(ProjectorClient::new(url_field.text().as_str()));
                 main_stack.set_visible_child_name("projector_control_page");
             });
         }
 
         let window_clone = window.clone();
         main_stack.connect_visible_child_name_notify(move |e| {
-            if e.visible_child_name().unwrap().as_str() != "projector_control_page" {return;} // maybe unnecessary
+            if e.visible_child_name().unwrap().as_str() != "projector_control_page" {
+                return;
+            } // maybe unnecessary
             let projector_client = projector_client.clone();
 
             let playlist_list: TreeView = builder.object("playlist_list").unwrap();
             let playlist_model: ListStore = builder.object("playlist_model").unwrap();
 
             playlist_list.set_model(Some(&playlist_model));
+
+            let mut rx = projector_client.borrow().as_ref().unwrap().subscribe();
+
+            tokio::spawn(async move {
+                while let Some(evt) = rx.recv().await {
+                    println!("{evt:?}");
+                    match evt {
+                        ProjectorCommand::VideoEnded => {
+                            println!("a");
+                        }
+                        _ => {}
+                    }
+                }
+            });
 
             if let Some(add_button) = builder.object::<Button>("add_source_button") {
                 let playlist_model_clone = playlist_model.clone();
@@ -143,7 +162,7 @@ async fn main() {
 
             // skip option box
             let skip_options = ListStore::new(&[String::static_type()]);
-            for option in ["VideoEnd", "Input", "Time(5)"] {
+            for option in ["VideoEnd", "None" /*"Time(5)"*/] {
                 skip_options.set(&skip_options.append(), &[(0, &option)]);
             }
 
@@ -174,7 +193,8 @@ async fn main() {
                         let skip = playlist_model_clone.get_value(&iter, 1).get().unwrap();
 
                         if let Some(projector_client) = projector_client.borrow().as_ref() {
-                            let _ = projector_client.send_command(ProjectorCommand::Start { path, skip });
+                            let _ = projector_client
+                                .send_command(ProjectorCommand::Start { path, skip });
                         }
 
                         playlist_list_clone.selection().select_iter(&iter);
@@ -196,8 +216,8 @@ async fn main() {
                             let skip = playlist_model_clone.get_value(&iter, 1).get().unwrap();
 
                             if let Some(projector_client) = projector_client.borrow().as_ref() {
-                                let _ =
-                                    projector_client.send_command(ProjectorCommand::Start { path, skip });
+                                let _ = projector_client
+                                    .send_command(ProjectorCommand::Start { path, skip });
                             }
 
                             playlist_list_clone.selection().select_iter(&next_iter);
@@ -219,8 +239,8 @@ async fn main() {
                             let skip = playlist_model_clone.get_value(&iter, 1).get().unwrap();
 
                             if let Some(projector_client) = projector_client.borrow().as_ref() {
-                                let _ =
-                                    projector_client.send_command(ProjectorCommand::Start { path, skip });
+                                let _ = projector_client
+                                    .send_command(ProjectorCommand::Start { path, skip });
                             }
 
                             playlist_list_clone.selection().select_iter(&prev_iter);

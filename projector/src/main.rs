@@ -1,6 +1,8 @@
 // Thank you: https://github.com/dwiandhikaap/rust-raylib-gstreamer/blob/main/src/main.rs
 
 use std::env;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use anyhow::{anyhow, Error};
 use gstreamer_app::gst;
 use local_ip_address::list_afinet_netifas;
@@ -19,7 +21,7 @@ fn main() -> Result<(), Error> {
     gst::init()?;
 
     // ipc
-    let mut rx = start_ipc_server();
+    let (mut tx, mut rx) = start_ipc_server();
 
     /*let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
@@ -44,6 +46,8 @@ fn main() -> Result<(), Error> {
 
     let network_interfaces = list_afinet_netifas()?;
 
+    let mut connected = false; // todo: do it correctly
+
     while !rl.window_should_close() {
         if let Some(key) = rl.get_key_pressed() {
             match key {
@@ -60,6 +64,7 @@ fn main() -> Result<(), Error> {
                     println!("Starting video, {:?} with skip {}", path, skip);
 
                     if let Ok(mut v) = RaylibVideo::new(&path, &mut rl, &thread) {
+                        connected = true;
                         v.play();
                         video = Some(v);
                     }
@@ -91,19 +96,27 @@ fn main() -> Result<(), Error> {
             let pos = Vector2::new(pos_x as f32, pos_y as f32);
 
             d.draw_texture_ex(&v.frame_texture, pos, rotation, scale, Color::WHITE);
+
+            if v.is_finished() {
+                println!("aa");
+                let _ = tx.send(ProjectorCommand::VideoEnded);
+                video = None;
+            }
         } else {
-            d.draw_fps(0, 0);
+            if (!connected) {
+                d.draw_fps(0, 0);
 
-            d.draw_text(format!("SimplePresenter Projector\n\nScreen: {screen_width}X{screen_height}").as_str(), 12, 12, 18, Color::WHITE);
+                d.draw_text(format!("SimplePresenter Projector\n\nScreen: {screen_width}X{screen_height}").as_str(), 12, 12, 18, Color::WHITE);
 
-            let mut x = screen_width / 2.0 - 240.0;
-            let mut y = screen_height / 2.0 - 240.0;
-            d.draw_text("Server ready:", x as i32, y as i32, 18, Color::WHITE);
-            x += 20.0;
-            y += 24.0;
-            for (_, ip) in network_interfaces.iter() {
-                d.draw_text(format!("ws://{ip:?}:8765").as_str(), x as i32, y as i32, 24, Color::WHITE);
+                let mut x = screen_width / 2.0 - 240.0;
+                let mut y = screen_height / 2.0 - 240.0;
+                d.draw_text("Server ready:", x as i32, y as i32, 18, Color::WHITE);
+                x += 20.0;
                 y += 24.0;
+                for (_, ip) in network_interfaces.iter() {
+                    d.draw_text(format!("ws://{ip:?}:8765").as_str(), x as i32, y as i32, 24, Color::WHITE);
+                    y += 24.0;
+                }
             }
         }
 

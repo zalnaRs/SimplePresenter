@@ -179,7 +179,6 @@ impl RaylibVideo {
             audio_info = Some(info)
         }
 
-        // Replace the pipeline creation section with this code
         let pipeline_str = format!(
             "filesrc location=\"{}\" ! decodebin name=decode ! queue ! videoconvert ! video/x-raw,format=RGB,width={},height={},colorimetry=sRGB ! appsink name=appsink sync=true decode. ! queue ! audioconvert !volume volume=0.1 ! audioresample ! autoaudiosink",
             path_canonical_str, video_width, video_height
@@ -300,7 +299,18 @@ impl RaylibVideo {
         self.seek(self.get_timestamp() as i64 + time_ms);
     }
 
-    fn wait_until_finished(&self) {
+    pub(crate) fn is_finished(&self) -> bool {
+        if let Some(bus) = self.pipeline.bus() {
+            while let Some(msg) = bus.pop() {
+                if msg.type_() == gst::MessageType::Eos {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub(crate) fn wait_until_finished(&self) {
         let bus = match self.pipeline.bus() {
             Some(b) => b,
             None => return,
