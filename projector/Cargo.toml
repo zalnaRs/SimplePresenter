@@ -1,0 +1,20 @@
+[package]
+name = "projector"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+raylib = { version = "5.5.1" }
+gstreamer = "0.24.2"
+gstreamer-video = "0.24.2"
+gstreamer-app = "0.24.2"
+gstreamer-pbutils = "0.24.2"
+anyhow = "1.0.100"
+log = "0.4.28"
+fraction = "0.15.3"
+
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
+tokio-tungstenite = "0.27.0"
+futures-util = "0.3"
+
+shared = { path = "../shared" }

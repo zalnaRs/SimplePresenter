@@ -32,7 +32,7 @@ async fn main() {
 
         while let Some(cmd) = cmd_rx.recv().await {
             let payload = match cmd {
-                ProjectorCommand::Start { path, skip } => format!("START {} {}", path, skip),
+                ProjectorCommand::Start { path, skip } => format!("START\n{}\n{}", path, skip),
                 ProjectorCommand::Next => "NEXT".to_string(),
                 ProjectorCommand::Prev => "PREV".to_string(),
             };

@@ -22,21 +22,9 @@
 
                 <!-- Top: Source and Playlist side by side -->
                 <child>
-                    <object class="GtkBox">
-                        <property name="orientation">vertical</property>
-                        <child>
-                            <object class="GtkLabel">
-                                <property name="label">Hello from XML!</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkButton" id="test_button">
-                                <property name="label">Click Me</property>
-                            </object>
-                        </child>
-                    </object>
                     <object class="GtkPaned" id="paned">
                         <property name="orientation">horizontal</property>
+                        <property name="vexpand">true</property>
 
                         <!-- Playlist list -->
                         <child>
@@ -45,8 +33,10 @@
                                 <child>
                                     <object class="GtkBox">
                                         <property name="orientation">vertical</property>
+                                        <property name="vexpand">true</property>
                                         <child>
                                             <object class="GtkScrolledWindow">
+                                                <property name="vexpand">true</property>
                                                 <child>
                                                     <object class="GtkTreeView" id="playlist_list">
                                                         <property name="headers-visible">true</property>
