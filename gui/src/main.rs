@@ -33,8 +33,6 @@ async fn main() {
         while let Some(cmd) = cmd_rx.recv().await {
             let payload = match cmd {
                 ProjectorCommand::Start { path, skip } => format!("START\n{}\n{}", path, skip),
-                ProjectorCommand::Next => "NEXT".to_string(),
-                ProjectorCommand::Prev => "PREV".to_string(),
             };
             if let Err(e) = write
                 .send(tokio_tungstenite::tungstenite::Message::Text(Utf8Bytes::from(payload)))

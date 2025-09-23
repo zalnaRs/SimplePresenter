@@ -39,6 +39,4 @@ pub struct Source {
 #[derive(Debug)]
 pub enum ProjectorCommand {
     Start { path: String, skip: String },
-    Next,
-    Prev,
 }
