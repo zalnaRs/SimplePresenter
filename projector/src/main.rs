@@ -3,6 +3,7 @@
 use std::env;
 use anyhow::{anyhow, Error};
 use gstreamer_app::gst;
+use local_ip_address::list_afinet_netifas;
 use raylib::color::Color;
 use raylib::ffi::KeyboardKey;
 use raylib::math::Vector2;
@@ -33,11 +34,15 @@ fn main() -> Result<(), Error> {
         .title("SimplePresenter Projector")
         .build();
 
+    rl.set_target_fps(60); // todo: configurable
+
     let mut video: Option<RaylibVideo> = None;
 
     let mut scale = 1.0;
     let mut rotation = 0.0;
     let mut pos = Vector2::new(0.0, 0.0);
+
+    let network_interfaces = list_afinet_netifas()?;
 
     while !rl.window_should_close() {
         if let Some(key) = rl.get_key_pressed() {
@@ -68,11 +73,11 @@ fn main() -> Result<(), Error> {
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::BLACK);
 
+        let screen_width = d.get_render_width() as f32;
+        let screen_height = d.get_render_height() as f32;
+
         if let Some(ref mut v) = video {
             v.update();
-
-            let screen_width = d.get_render_width() as f32;
-            let screen_height = d.get_render_height() as f32;
 
             let scale_x = screen_width / v.width as f32;
             let scale_y = screen_height / v.height as f32;
@@ -86,9 +91,22 @@ fn main() -> Result<(), Error> {
             let pos = Vector2::new(pos_x as f32, pos_y as f32);
 
             d.draw_texture_ex(&v.frame_texture, pos, rotation, scale, Color::WHITE);
+        } else {
+            d.draw_fps(0, 0);
+
+            d.draw_text(format!("SimplePresenter Projector\n\nScreen: {screen_width}X{screen_height}").as_str(), 12, 12, 18, Color::WHITE);
+
+            let mut x = screen_width / 2.0 - 240.0;
+            let mut y = screen_height / 2.0 - 240.0;
+            d.draw_text("Server ready:", x as i32, y as i32, 18, Color::WHITE);
+            x += 20.0;
+            y += 24.0;
+            for (_, ip) in network_interfaces.iter() {
+                d.draw_text(format!("ws://{ip:?}:8765").as_str(), x as i32, y as i32, 24, Color::WHITE);
+                y += 24.0;
+            }
         }
 
-        d.draw_fps(0, 0);
     }
 
     Ok(())
