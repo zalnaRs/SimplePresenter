@@ -13,7 +13,7 @@ anyhow = "1.0.100"
 log = "0.4.28"
 fraction = "0.15.3"
 
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "rt"] }
 tokio-tungstenite = "0.27.0"
 futures-util = "0.3"
 

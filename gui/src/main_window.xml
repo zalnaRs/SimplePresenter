@@ -16,123 +16,159 @@
         <property name="default-height">600</property>
 
         <child>
-            <object class="GtkBox" id="main_box">
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
-
-                <!-- Top: Source and Playlist side by side -->
+            <object class="GtkStack" id="main_stack">
                 <child>
-                    <object class="GtkPaned" id="paned">
-                        <property name="orientation">horizontal</property>
-                        <property name="vexpand">true</property>
+                    <object class="GtkStackPage">
+                        <property name="name">connect_page</property>
+                        <property name="child">
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
 
-                        <!-- Playlist list -->
-                        <child>
-                            <object class="GtkFrame">
-                                <property name="label">Playlist</property>
+                                <!-- connect -->
                                 <child>
-                                    <object class="GtkBox">
-                                        <property name="orientation">vertical</property>
-                                        <property name="vexpand">true</property>
-                                        <child>
-                                            <object class="GtkScrolledWindow">
-                                                <property name="vexpand">true</property>
-                                                <child>
-                                                    <object class="GtkTreeView" id="playlist_list">
-                                                        <property name="headers-visible">true</property>
-                                                        <child>
-                                                            <object class="GtkTreeViewColumn" id="playlist_column">
-                                                                <property name="title">Track</property>
-                                                                <child>
-                                                                    <object class="GtkCellRendererText"/>
-                                                                    <attributes>
-                                                                        <attribute name="text">0</attribute>
-                                                                    </attributes>
-                                                                </child>
-                                                            </object>
-                                                        </child>
+                                    <object class="GtkEntry" id="url_entry">
+                                        <property name="placeholder-text">ws://127.0.0.1:8765</property>
+                                    </object>
+                                </child>
 
-                                                        <!-- Skip column -->
+                                <child>
+                                    <object class="GtkButton" id="connect_button">
+                                        <property name="label">Connect</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkStackPage">
+                        <property name="name">projector_control_page</property>
+                        <property name="child">
+                            <object class="GtkBox" id="main_box">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+
+                                <!-- playlist -->
+                                <child>
+                                    <object class="GtkPaned" id="paned">
+                                        <property name="orientation">horizontal</property>
+                                        <property name="vexpand">true</property>
+
+                                        <!-- Playlist list -->
+                                        <child>
+                                            <object class="GtkFrame">
+                                                <property name="label">Playlist</property>
+                                                <child>
+                                                    <object class="GtkBox">
+                                                        <property name="orientation">vertical</property>
+                                                        <property name="vexpand">true</property>
                                                         <child>
-                                                            <object class="GtkTreeViewColumn">
-                                                                <property name="title">Skip</property>
+                                                            <object class="GtkScrolledWindow">
+                                                                <property name="vexpand">true</property>
                                                                 <child>
-                                                                    <object class="GtkCellRendererCombo" id="skip_renderer">
-                                                                        <property name="editable">true</property>
-                                                                        <property name="has-entry">true</property>
+                                                                    <object class="GtkTreeView" id="playlist_list">
+                                                                        <property name="headers-visible">true</property>
+                                                                        <child>
+                                                                            <object class="GtkTreeViewColumn"
+                                                                                    id="playlist_column">
+                                                                                <property name="title">Track</property>
+                                                                                <child>
+                                                                                    <object class="GtkCellRendererText"/>
+                                                                                    <attributes>
+                                                                                        <attribute name="text">0
+                                                                                        </attribute>
+                                                                                    </attributes>
+                                                                                </child>
+                                                                            </object>
+                                                                        </child>
+
+                                                                        <!-- Skip column -->
+                                                                        <child>
+                                                                            <object class="GtkTreeViewColumn">
+                                                                                <property name="title">Skip</property>
+                                                                                <child>
+                                                                                    <object class="GtkCellRendererCombo"
+                                                                                            id="skip_renderer">
+                                                                                        <property name="editable">true</property>
+                                                                                        <property name="has-entry">true</property>
+                                                                                    </object>
+                                                                                    <attributes>
+                                                                                        <attribute name="text">1</attribute>
+                                                                                    </attributes>
+                                                                                </child>
+                                                                            </object>
+                                                                        </child>
                                                                     </object>
-                                                                    <attributes>
-                                                                        <attribute name="text">1</attribute>
-                                                                    </attributes>
                                                                 </child>
                                                             </object>
                                                         </child>
-                                                    </object>
-                                                </child>
-                                            </object>
-                                        </child>
-                                        <child>
-                                            <object class="GtkBox">
-                                                <property name="orientation">horizontal</property>
-                                                <property name="spacing">6</property>
-                                                <child>
-                                                    <object class="GtkButton" id="add_source_button">
-                                                        <property name="label">Add Source</property>
-                                                    </object>
-                                                </child>
-                                                <child>
-                                                    <object class="GtkButton" id="move_up_button">
-                                                        <property name="label">Move Up</property>
-                                                    </object>
-                                                </child>
-                                                <child>
-                                                    <object class="GtkButton" id="move_down_button">
-                                                        <property name="label">Move Down</property>
-                                                    </object>
-                                                </child>
-                                                <child>
-                                                    <object class="GtkButton" id="remove_button">
-                                                        <property name="label">Remove</property>
+                                                        <child>
+                                                            <object class="GtkBox">
+                                                                <property name="orientation">horizontal</property>
+                                                                <property name="spacing">6</property>
+                                                                <child>
+                                                                    <object class="GtkButton" id="add_source_button">
+                                                                        <property name="label">Add Source</property>
+                                                                    </object>
+                                                                </child>
+                                                                <child>
+                                                                    <object class="GtkButton" id="move_up_button">
+                                                                        <property name="label">Move Up</property>
+                                                                    </object>
+                                                                </child>
+                                                                <child>
+                                                                    <object class="GtkButton" id="move_down_button">
+                                                                        <property name="label">Move Down</property>
+                                                                    </object>
+                                                                </child>
+                                                                <child>
+                                                                    <object class="GtkButton" id="remove_button">
+                                                                        <property name="label">Remove</property>
+                                                                    </object>
+                                                                </child>
+                                                            </object>
+                                                        </child>
                                                     </object>
                                                 </child>
                                             </object>
                                         </child>
                                     </object>
                                 </child>
+
+                                <!-- controls -->
+                                <child>
+                                    <object class="GtkBox" id="controls_box">
+                                        <property name="orientation">horizontal</property>
+                                        <property name="spacing">12</property>
+                                        <property name="halign">center</property>
+                                        <child>
+                                            <object class="GtkButton" id="prev_button">
+                                                <property name="label">Previous</property>
+                                            </object>
+                                        </child>
+                                        <child>
+                                            <object class="GtkButton" id="play_button">
+                                                <property name="label">Play/Pause</property>
+                                            </object>
+                                        </child>
+                                        <child>
+                                            <object class="GtkButton" id="stop_button">
+                                                <property name="label">Stop</property>
+                                            </object>
+                                        </child>
+                                        <child>
+                                            <object class="GtkButton" id="next_button">
+                                                <property name="label">Next</property>
+                                            </object>
+                                        </child>
+                                    </object>
+                                </child>
+
                             </object>
-                        </child>
+                        </property>
                     </object>
                 </child>
-
-                <!-- Bottom: Media Controls -->
-                <child>
-                    <object class="GtkBox" id="controls_box">
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">12</property>
-                        <property name="halign">center</property>
-                        <child>
-                            <object class="GtkButton" id="prev_button">
-                                <property name="label">Previous</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkButton" id="play_button">
-                                <property name="label">Play/Pause</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkButton" id="stop_button">
-                                <property name="label">Stop</property>
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkButton" id="next_button">
-                                <property name="label">Next</property>
-                            </object>
-                        </child>
-                    </object>
-                </child>
-
             </object>
         </child>
     </object>
