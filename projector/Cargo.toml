@@ -1,7 +1,10 @@
 [package]
 name = "projector"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
+
+[package.metadata.winres]
+windows_subsystem = "windows"
 
 [dependencies]
 raylib = { version = "5.5.1" }
@@ -19,3 +22,11 @@ futures-util = "0.3"
 local-ip-address = "0.6.5"
 
 shared = { path = "../shared" }
+
+[build-dependencies]
+winres = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+debug = false

@@ -1,10 +1,7 @@
 use gtk4::prelude::{
     ApplicationExt, ApplicationExtManual, ButtonExt, FileChooserExt, FileExt, GtkWindowExt,
-    TreeViewExt,
-};
-use gtk4::prelude::{
-    CellRendererTextExt, EditableExt, NativeDialogExt, ObjectExt, StaticType, TreeModelExt,
-    TreeModelExtManual,
+    TreeViewExt, CellRendererTextExt, EditableExt, NativeDialogExt, ObjectExt, StaticType, TreeModelExt,
+    TreeModelExtManual
 };
 use gtk4::{
     Application, ApplicationWindow, Builder, Button, CellRendererCombo, Editable,
