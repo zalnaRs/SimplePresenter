@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use gtk4::prelude::{
     ApplicationExt, ApplicationExtManual, ButtonExt, FileChooserExt, FileExt, GtkWindowExt,
     TreeViewExt, CellRendererTextExt, EditableExt, NativeDialogExt, ObjectExt, StaticType, TreeModelExt,
