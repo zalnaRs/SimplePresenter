@@ -6,7 +6,7 @@ pub fn path_to_file_uri(path: &Path) -> anyhow::Result<String> {
 
     #[cfg(windows)]
     {
-        let path_str = canonical
+        let mut path_str = canonical
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Invalid Unicode in path"))?
             .replace('\\', "/");
