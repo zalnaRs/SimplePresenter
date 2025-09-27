@@ -1,4 +1,5 @@
 // Thank you: https://github.com/dwiandhikaap/rust-raylib-gstreamer/blob/main/src/main.rs
+#![windows_subsystem = "windows"]
 
 use std::env;
 use std::sync::Arc;
