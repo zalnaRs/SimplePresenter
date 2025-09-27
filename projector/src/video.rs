@@ -16,6 +16,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use std::{env, fmt};
+use shared::path::path_to_file_uri;
 
 #[derive(Debug)]
 pub struct AudioMetadata {
@@ -79,7 +80,8 @@ impl RaylibVideo {
             .to_str()
             .ok_or_else(|| anyhow!("Path contains invalid Unicode: {:?}", path_canonical))?;
 
-        let uri = format!("file://{}", path_canonical_str);
+        let uri = path_to_file_uri(&path_canonical)
+            .map_err(|e| anyhow!("Failed to get uri: {}", e))?;
         let info = discoverer
             .discover_uri(&uri)
             .map_err(|e| anyhow!("Failed to discover media information for '{}': {}", path, e))?;

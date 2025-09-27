@@ -1,6 +1,8 @@
 use serde::Serialize;
 
 pub mod client;
+pub mod path;
+
 #[derive(Debug, Clone, Serialize)]
 pub enum Skip {
     VideoEnd,
