@@ -1,5 +1,5 @@
 // Thank you: https://github.com/dwiandhikaap/rust-raylib-gstreamer/blob/main/src/main.rs
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
 
 use std::env;
 use std::sync::Arc;
@@ -96,10 +96,12 @@ fn main() -> Result<(), Error> {
             let pos_y = (screen_height - draw_height) as f64 * 0.5;
             let pos = Vector2::new(pos_x as f32, pos_y as f32);
 
+            //println!("Screen: {screen_width}x{screen_height}; scale: {scale}; video: {draw_width}x{draw_height}; pos: {pos_x}, {pos_y}");
+
             d.draw_texture_ex(&v.frame_texture, pos, rotation, scale, Color::WHITE);
+            //d.draw_rectangle_v(pos, Vector2::new(draw_width, draw_height), Color::GREEN);
 
             if v.is_finished() {
-                println!("aa");
                 let _ = tx.send(ProjectorCommand::VideoEnded);
                 video = None;
             }

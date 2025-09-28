@@ -1,4 +1,4 @@
-
+﻿
 use anyhow::{anyhow, Error, Result};
 use fraction::Fraction;
 use gstreamer::{self as gst, SeekFlags};
@@ -180,10 +180,10 @@ impl RaylibVideo {
 
             audio_info = Some(info)
         }
-
+        
         let pipeline_str = format!(
-            "filesrc location=\"{}\" ! decodebin name=decode ! queue ! videoconvert ! video/x-raw,format=RGB,width={},height={},colorimetry=sRGB ! appsink name=appsink sync=true decode. ! queue ! audioconvert !volume volume=0.1 ! audioresample ! autoaudiosink",
-            path_canonical_str, video_width, video_height
+            "urisourcebin uri=\"{}\" name=src ! decodebin name=decode ! queue ! videoconvert ! video/x-raw,format=RGB,width={},height={},colorimetry=sRGB ! appsink name=appsink sync=true decode. ! queue ! audioconvert !volume volume=0.1 ! audioresample ! autoaudiosink",
+            uri, video_width, video_height
         );
 
         let pipeline = gstreamer::parse::launch(&pipeline_str)
